@@ -1,0 +1,16 @@
+{
+    "name": "attakei/qiita-markdown",
+    "description": "Qiita flavored Markdown parser",
+    "type": "library",
+    "require": {
+        "cebe/markdown": "^1.1"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "attakei",
+            "email": "attakei@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev"
+}
