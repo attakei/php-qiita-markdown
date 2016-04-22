@@ -3,7 +3,7 @@
 use \attakei\QiitaMarkdown\QiitaMarkdown;
 
 
-class QiitaMarkdownTest extends \PHPUnit_Framework_TestCase
+class FencedCodeTest extends \PHPUnit_Framework_TestCase
 {
     protected static function createParser()
     {
