@@ -13,6 +13,7 @@ class QiitaMarkdown extends GithubMarkdown
     {
         // parent::__construct();
         $this->enableNewlines = true;
+        $this->headlines = new \SplDoublyLinkedList();
     }
 
     protected function consumeFencedCode($lines, $current)
@@ -46,5 +47,45 @@ class QiitaMarkdown extends GithubMarkdown
 </div>
 END_OF_FORMAT;
         return sprintf($template, $block['filename'], $block['content']);
+	}
+
+
+    protected function consumeHeadline($lines, $current)
+    {
+        list($block, $current) = parent::consumeHeadline($lines, $current);
+        if (count($this->headlines) == 0) {
+            $this->headlines->push('headline-'.$block['level']);
+            return [$block, $current];
+        }
+        $last = $this->headlines->top();
+        $lastLevel = substr_count($last, '-');
+        if ( $lastLevel == $block['level'] ) {
+            $splited = explode('-', $last);
+            $splited[] = array_pop($splited) + 1;
+            $this->headlines->push(implode('-', $splited));
+            return [$block, $current];
+        }
+        if ( $lastLevel < $block['level'] ) {
+            $splited = explode('-', $last);
+            for ($sub = $block['level'] - $lastLevel; $sub > 0; $sub--) {
+                $splited[] = '1';
+            }
+            $this->headlines->push(implode('-', $splited));
+            return [$block, $current + $block['level'] - $lastLevel];
+        }
+
+    }
+
+    /**
+	 * Renders a headline
+	 */
+	protected function renderHeadline($block)
+	{
+		$tag = 'h' . $block['level'];
+        $name = $this->headlines->shift();
+        return sprintf(
+            '<%s name="%s">%s</%s>',
+            $tag, $name, $this->renderAbsy($block['content']), $tag
+        );
 	}
 }
