@@ -9,6 +9,11 @@ use \cebe\markdown\GithubMarkdown;
 
 class QiitaMarkdown extends GithubMarkdown
 {
+    /**
+     * @var null|\SplDoublyLinkedList
+     */
+    public $headlines = null;
+
     public function __construct()
     {
         // parent::__construct();
@@ -93,6 +98,7 @@ END_OF_FORMAT;
     {
         list($block, $current) = parent::consumeHeadline($lines, $current);
         $this->headlines = $this->calcHeadline($block['level'], $this->headlines);
+        $this->headlines->rewind();
         return [$block, $current];
     }
 
@@ -102,10 +108,16 @@ END_OF_FORMAT;
 	protected function renderHeadline($block)
 	{
 		$tag = 'h' . $block['level'];
-        $name = $this->headlines->shift();
+        $name = $this->headlines->current();
+        $this->headlines->next();
         return sprintf(
             '<%s name="%s">%s</%s>',
             $tag, 'headline-'.implode('-', $name), $this->renderAbsy($block['content']), $tag
         );
 	}
+
+    public function parse($text)
+    {
+        return parent::parse($text);
+    }
 }

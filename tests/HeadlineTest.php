@@ -101,4 +101,16 @@ class HeadlineTest extends \PHPUnit_Framework_TestCase
         $afterList = $method->invokeArgs($parser, [3, $afterList]);
         $this->assertEquals($afterList->top(), [1, 1, 1]);
     }
+
+    public function testAfterPared()
+    {
+        $text = ''
+            . "# test1\n"
+            . "## test2\n"
+            . "# test3\n";
+        $parser = static::createParser();
+        $parser->parse($text);
+        $this->assertNotEquals($parser->headlines->count(), 0);
+    }
+
 }
