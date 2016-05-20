@@ -46,31 +46,25 @@ class HeadlineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h1 name="headline-2">test2</h1>');
     }
 
-//    public function testPlainCodeChildHead()
-//    {
-//        $text = ''
-//            . "# test1\n"
-//            . "## test2\n";
-//        $parser = static::createParser();
-//        $rendered = $parser->parse($text);
-//        $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h2 name="headline-1-1">test2</h2>');
-//    }
-//
-//    public function testPlainCodeComplexHead()
-//    {
-//        $text = ''
-//            . "# test1\n"
-//            . "## test2\n"
-//            . "# test3\n";
-//        $parser = static::createParser();
-//        $rendered = $parser->parse($text);
-//        print($rendered);
-//        // $this->assertEquals(trim($rendered),
-//        //     '<h1 name="headline-1">test1</h1>'
-//        //     . '<h2 name="headline-1-1">test2</h2>'
-//        //     . '<h1 name="headline-2">test3</h1>'
-//        // );
-//    }
+    public function testPlainCodeChildHead()
+    {
+        $text = ''
+            . "# test1\n"
+            . "## test2\n";
+        $parser = static::createParser();
+        $rendered = $parser->parse($text);
+        $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h2 name="headline-1-1">test2</h2>');
+    }
+
+    public function testPlainCodeComplexHead()
+    {
+        $text = ''
+            . "# test1\n"
+            . "## test2\n"
+            . "# test3\n";
+        $parser = static::createParser();
+        $parser->parse($text);
+    }
 
     public function testCalcHeadline_Flat()
     {

@@ -92,33 +92,8 @@ END_OF_FORMAT;
     protected function consumeHeadline($lines, $current)
     {
         list($block, $current) = parent::consumeHeadline($lines, $current);
-        if (count($this->headlines) == 0) {
-            $headlineInfo = [];
-            for ($i = 1; $i < $block['level']; $i++) {
-                $headlineInfo[] = 0;
-            }
-            $headlineInfo[] = 1;
-            $this->headlines->push($headlineInfo);
-            return [$block, $current];
-        }
-        $lastInfo = $this->headlines->top();
-        $lastLevel = count($lastInfo);
-        if ( $lastLevel == $block['level'] ) {
-            $currentInfo = $lastInfo;
-            $currentInfo[$lastLevel-1] += 1;
-            $this->headlines->push($currentInfo);
-            return [$block, $current];
-        }
-        if ( $lastLevel < $block['level'] ) {
-            $currentInfo = $lastInfo;
-            for ($sub = $block['level'] - $lastLevel; $sub > 0; $sub--) {
-                array_pop($currentInfo);
-            }
-            $currentInfo[$block['level']-1] += 1;
-            $this->headlines->push($currentInfo);
-            return [$block, $current + $block['level'] - $lastLevel];
-        }
-
+        $this->headlines = $this->calcHeadline($block['level'], $this->headlines);
+        return [$block, $current];
     }
 
     /**
