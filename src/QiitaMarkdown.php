@@ -49,28 +49,73 @@ END_OF_FORMAT;
         return sprintf($template, $block['filename'], $block['content']);
 	}
 
+    /**
+     * @param int $blockLevel
+     * @param \SplDoublyLinkedList $data
+     * @return \SplDoublyLinkedList
+     */
+    protected function calcHeadline($blockLevel, $data)
+    {
+        if ( $data->count() == 0 ) {
+            $data->push([$blockLevel]);
+            return $data;
+        }
+        $lastHeadline = $data->top();
+        $currentHeadline = $lastHeadline;
+        $lastLevel = count($lastHeadline);
+        if ($blockLevel == $lastLevel) {
+            // 直前と同一階層なら、1要素修正
+            $currentHeadline[$lastLevel-1] += 1;
+            $data->push($currentHeadline);
+            return $data;
+        }
+        if ($blockLevel > $lastLevel) {
+            // 子階層の要素ならその差分だけ構築して追加
+            for ($i = 0; $i < ($blockLevel - $lastLevel - 1); $i++) {
+                $currentHeadline[] = 0;
+            }
+            $currentHeadline[] = 1;
+            $data->push($currentHeadline);
+            return $data;
+        }
+        if ($blockLevel < $lastLevel) {
+            // 子階層の要素ならその差分だけ構築して追加
+            for ($i = 0; $i < ($lastLevel - $blockLevel); $i++) {
+                array_pop($currentHeadline);
+            }
+            $currentHeadline[count($currentHeadline)-1] += 1;
+            $data->push($currentHeadline);
+        }
+        return $data;
+    }
 
     protected function consumeHeadline($lines, $current)
     {
         list($block, $current) = parent::consumeHeadline($lines, $current);
         if (count($this->headlines) == 0) {
-            $this->headlines->push('headline-'.$block['level']);
+            $headlineInfo = [];
+            for ($i = 1; $i < $block['level']; $i++) {
+                $headlineInfo[] = 0;
+            }
+            $headlineInfo[] = 1;
+            $this->headlines->push($headlineInfo);
             return [$block, $current];
         }
-        $last = $this->headlines->top();
-        $lastLevel = substr_count($last, '-');
+        $lastInfo = $this->headlines->top();
+        $lastLevel = count($lastInfo);
         if ( $lastLevel == $block['level'] ) {
-            $splited = explode('-', $last);
-            $splited[] = array_pop($splited) + 1;
-            $this->headlines->push(implode('-', $splited));
+            $currentInfo = $lastInfo;
+            $currentInfo[$lastLevel-1] += 1;
+            $this->headlines->push($currentInfo);
             return [$block, $current];
         }
         if ( $lastLevel < $block['level'] ) {
-            $splited = explode('-', $last);
+            $currentInfo = $lastInfo;
             for ($sub = $block['level'] - $lastLevel; $sub > 0; $sub--) {
-                $splited[] = '1';
+                array_pop($currentInfo);
             }
-            $this->headlines->push(implode('-', $splited));
+            $currentInfo[$block['level']-1] += 1;
+            $this->headlines->push($currentInfo);
             return [$block, $current + $block['level'] - $lastLevel];
         }
 
@@ -85,7 +130,7 @@ END_OF_FORMAT;
         $name = $this->headlines->shift();
         return sprintf(
             '<%s name="%s">%s</%s>',
-            $tag, $name, $this->renderAbsy($block['content']), $tag
+            $tag, 'headline-'.implode('-', $name), $this->renderAbsy($block['content']), $tag
         );
 	}
 }

@@ -46,28 +46,65 @@ class HeadlineTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h1 name="headline-2">test2</h1>');
     }
 
-    public function testPlainCodeChildHead()
+//    public function testPlainCodeChildHead()
+//    {
+//        $text = ''
+//            . "# test1\n"
+//            . "## test2\n";
+//        $parser = static::createParser();
+//        $rendered = $parser->parse($text);
+//        $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h2 name="headline-1-1">test2</h2>');
+//    }
+//
+//    public function testPlainCodeComplexHead()
+//    {
+//        $text = ''
+//            . "# test1\n"
+//            . "## test2\n"
+//            . "# test3\n";
+//        $parser = static::createParser();
+//        $rendered = $parser->parse($text);
+//        print($rendered);
+//        // $this->assertEquals(trim($rendered),
+//        //     '<h1 name="headline-1">test1</h1>'
+//        //     . '<h2 name="headline-1-1">test2</h2>'
+//        //     . '<h1 name="headline-2">test3</h1>'
+//        // );
+//    }
+
+    public function testCalcHeadline_Flat()
     {
-        $text = ''
-            . "# test1\n"
-            . "## test2\n";
         $parser = static::createParser();
-        $rendered = $parser->parse($text);
-        $this->assertEquals(trim($rendered), '<h1 name="headline-1">test1</h1><h2 name="headline-1-1">test2</h2>');
+        $method = static::getMethod('calcHeadline');
+        $beforeList =  new \SplDoublyLinkedList();
+        $afterList = $method->invokeArgs($parser, [1, $beforeList]);
+        $this->assertEquals($afterList->top(), [1,]);
+
+        $afterList = $method->invokeArgs($parser, [1, $afterList]);
+        $this->assertEquals($afterList->top(), [2,]);
     }
 
-    public function testPlainCodeComplexHead()
+    public function testCalcHeadline_Stair()
     {
-        $text = ''
-            . "# test1\n"
-            . "## test2\n"
-            . "# test3\n";
         $parser = static::createParser();
-        $rendered = $parser->parse($text);
-        // $this->assertEquals(trim($rendered),
-        //     '<h1 name="headline-1">test1</h1>'
-        //     . '<h2 name="headline-1-1">test2</h2>'
-        //     . '<h1 name="headline-2">test3</h1>'
-        // );
+        $method = static::getMethod('calcHeadline');
+        $beforeList =  new \SplDoublyLinkedList();
+        $afterList = $method->invokeArgs($parser, [1, $beforeList]);
+        $this->assertEquals($afterList->top(), [1,]);
+
+        $afterList = $method->invokeArgs($parser, [2, $afterList]);
+        $this->assertEquals($afterList->top(), [1, 1,]);
+
+        $afterList = $method->invokeArgs($parser, [4, $afterList]);
+        $this->assertEquals($afterList->top(), [1, 1, 0, 1,]);
+
+        $afterList = $method->invokeArgs($parser, [5, $afterList]);
+        $this->assertEquals($afterList->top(), [1, 1, 0, 1, 1,]);
+
+        $afterList = $method->invokeArgs($parser, [5, $afterList]);
+        $this->assertEquals($afterList->top(), [1, 1, 0, 1, 2,]);
+
+        $afterList = $method->invokeArgs($parser, [3, $afterList]);
+        $this->assertEquals($afterList->top(), [1, 1, 1]);
     }
 }
